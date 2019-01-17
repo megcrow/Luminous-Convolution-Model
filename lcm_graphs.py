@@ -48,49 +48,51 @@ def plot_raw_data(ycol, xlabel, ylabel, title):
     plt.show()
 
 
-# Scale radius such that 0<r<1. The list scaled_radii preserves groupings
+# Scale radius such that 0<r<1. The list scaled_radii preserves groupings of
 # radii by galaxy. Index [0]-[50] corresponds to the radii of the
 # respective file number
-def scaled_radii(ycol):
+def scale_radii(ycol):
     scaled_radii = []
     ycol_data_matrix = get_data(ycol)
     for i in range(len(ycol_data_matrix)):
-        rmax = max(ycol_data_matrix[i][0])
-        rscaled_list = []
-        for j in range(len(ycol_data_matrix[i][0])):
-            rscaled = ycol_data_matrix[i][0][j] / rmax
-            rscaled_list.append(rscaled)
-        scaled_radii.append(rscaled_list)
+        radii_values = ycol_data_matrix[i][0]
+        max_radius = max(radii_values)
+        scaled_galaxy_radii = []
+        for j in range(len(radii_values)):
+            scaled_radius = radii_values[j] / max_radius
+            scaled_galaxy_radii.append(scaled_radius)
+        scaled_radii.append(scaled_galaxy_radii)
     return scaled_radii
 
 
-# Calculate Luminous Velocity for each galaxy vlum = sqrt(vbulge^2 + vdisk^2 +vgas^2)
-def calc_vlum(ycol1, ycol2, ycol3):
-    vlum = []
-    vdisk_matrix = get_data(ycol1)
-    vgas_matrix = get_data(ycol2)
-    vbulge_matrix = get_data(ycol3)
-    for i in range(len(vdisk_matrix)):
-        vlum_list = []
-        for j in range(len(vdisk_matrix[i][1])):
-            vdisk_sqrd = vdisk_matrix[i][1][j]**2
-            vgas_sqrd = vgas_matrix[i][1][j]**2
-            vbulge_sqrd = vbulge_matrix[i][1][j]**2
-            vlum_val = math.sqrt(vdisk_sqrd + vgas_sqrd + vbulge_sqrd)
-            vlum_list.append(vlum_val)
-        vlum.append(vlum_list)
-    return vlum
+# Calculates luminous velocity for each galaxy using
+# vlum = sqrt(vbulge^2 + vdisk^2 +vgas^2)
+def calc_luminous_velocity(ycol1, ycol2, ycol3):
+    v_lum = []
+    v_disk_matrix = get_data(ycol1)
+    v_gas_matrix = get_data(ycol2)
+    v_bulge_matrix = get_data(ycol3)
+    for i in range(len(v_disk_matrix)):
+        v_lum_list = []
+        for j in range(len(v_disk_matrix[i][1])):
+            v_disk_sqrd = v_disk_matrix[i][1][j]**2
+            v_gas_sqrd = v_gas_matrix[i][1][j]**2
+            v_bulge_sqrd = v_bulge_matrix[i][1][j]**2
+            v_lum_val = math.sqrt(v_disk_sqrd + v_gas_sqrd + v_bulge_sqrd)
+            v_lum_list.append(v_lum_val)
+        v_lum.append(v_lum_list)
+    return v_lum
 
 
 # Function to plot VLum data vs. scaled r values
 def plot_scaled_data():
-    scalrad = scaled_radii(4)
-    vlum_vals = calc_vlum(4, 5, 6)
+    scal_rad = scale_radii(4)
+    v_lum_vals = calc_luminous_velocity(4, 5, 6)
     v = []
-    for i in range(len(scalrad)):
-        r_obs_scal = scalrad[i]
-        v = vlum_vals[i]
-        plt.plot(r_obs_scal, v, marker='o', markersize=2)
+    for i in range(len(scal_rad)):
+        r = scal_rad[i]
+        v = v_lum_vals[i]
+        plt.plot(r, v, marker='o', markersize=2)
     plt.xlabel('Radius (scaled)')
     plt.ylabel('Luminous Velocity (km/s)')
     plt.title('Scaled Data')
