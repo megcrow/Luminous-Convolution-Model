@@ -16,7 +16,7 @@ def import_data():
     return data_list
 
 
-# Load data from files into matrix [[[r values], [yvalues]]]
+# Load data from files into matrix [[[radii], [velocities]]]
 def get_data(ycol):
     data_matrix = []
     data_list = import_data()
