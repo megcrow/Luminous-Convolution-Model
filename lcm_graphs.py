@@ -3,7 +3,9 @@ import numpy as np
 import os
 import math
 from os import listdir
-from scipy import interpolate
+import scipy.interpolate as interpolate
+
+
 
 DATA_DIR = './Data/'
 
@@ -66,7 +68,7 @@ def scale_radii(ycol):
 
 
 # Calculates luminous velocity for each galaxy using
-# vlum = sqrt(vbulge^2 + vdisk^2 +vgas^2)
+# v_lum_val = sqrt(vbulge^2 + vdisk^2 +vgas^2)
 def calc_luminous_velocity(ycol1, ycol2, ycol3):
     v_lum = []
     v_disk_matrix = get_data(ycol1)
@@ -84,7 +86,7 @@ def calc_luminous_velocity(ycol1, ycol2, ycol3):
     return v_lum
 
 
-# Function to plot VLum data vs. scaled r values
+# Function to plot v_lum data vs. scaled r values
 def plot_scaled_data():
     scal_rad = scale_radii(4)
     v_lum_vals = calc_luminous_velocity(4, 5, 6)
@@ -96,6 +98,37 @@ def plot_scaled_data():
     plt.xlabel('Radius (scaled)')
     plt.ylabel('Luminous Velocity (km/s)')
     plt.title('Scaled Data')
+    plt.show()
+
+
+def Bspline_interpolate_v_lum():
+    plt.clf()
+
+    # Produce scaled radii and luminous velocity data
+    scal_rad = scale_radii(4)
+    v_lum = calc_luminous_velocity(4, 5, 6)
+
+    for i in range(len(scal_rad)):
+        r = np.array(scal_rad[i])
+        v = np.array(v_lum[i])
+        N = len(r)
+        rmin, rmax = r.min(), r.max()
+        rr = np.linspace(rmin, rmax, N)
+
+        # Creat tuple (t, c, k) containing vector of knots,
+        # B-spline coefficients, and degree of spline
+        t, c, k = interpolate.splrep(r, v, s=0, k=4)
+
+
+        # Create B-spline object using (t, c, k)
+        spline = interpolate.BSpline(t, c, k, extrapolate = False)
+
+        # Plot B-spline fit (functional data)
+        plt.plot(r, spline(rr), label = 'BSpline')
+
+    plt.xlabel('Radius (scaled)')
+    plt.ylabel('Luminous Velocity (km/s)')
+    plt.title('Functional Data')
     plt.show()
 
 
@@ -117,6 +150,10 @@ def main():
 
     # Scaled luminous velocity data
     plot_scaled_data()
+
+    # Convert raw luminous velocity data to functional data 
+    # using B spline interpolation
+    Bspline_interpolate_v_lum()
 
 
 main()
